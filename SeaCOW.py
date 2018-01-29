@@ -159,6 +159,7 @@ class ConcordanceWriter(Processor):
     self.filename = None
 
   def prepare(self, query):
+    print self.filename
     self.handle         = open(self.filename, 'w') if self.filename else sys.stdout
     self.has_attributes = True if len(query.attributes) > 1 else False
     self.rex            = re.compile('^<.+>$')
@@ -177,6 +178,7 @@ class ConcordanceWriter(Processor):
     self.handle.write('# CNT_RIGHT:     %s\n' % query.context_right)
     self.handle.write('# DEDUPING:      %s\n' % str(query.bloom is not None))
     self.handle.write('# = CONCORDANCE TSV ===================================================\n')
+    self.handle.write('\t'.join(query.references + ['left.context', 'match', 'right.context']) + '\n')
 
   def finalise(self, query):
     self.handle.write('# = STATS =============================================================\n')

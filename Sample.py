@@ -13,8 +13,10 @@ q.attributes = ['word']
 q.structures = ['s']
 
 # Create a Processor object and attach it to the Query object.
-p = ConcordanceWriter()
-q.processor = p
+p            = ConcordanceWriter()
+p.filename   = 'chuzpe2.csv'
+q.processor  = p
 
+# Run the actual query.
 q.run()
 
