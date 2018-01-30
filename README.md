@@ -41,7 +41,9 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 ### Classes
 
-```Query(object)```
+```python
+Query(object)
+```
 
 Performs queries and pipes the data into a processor.
 
@@ -70,15 +72,21 @@ Enable or disable deduplication of concordances based on a bloom filter. Call wi
 Execute the query and process the results after everything has been set up.
 
 
-```Processor(object)```
+```python
+Processor(object)
+```
 
 The 'abstract' class from which processors should be derived.
 
-```ConcordanceWriter(Processor)```
+```python
+ConcordanceWriter(Processor)
+```
 
 A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
 
-```DependencyBuilder(Processor)```
+```python
+DependencyBuilder(Processor)
+```
 
 A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format).
 
