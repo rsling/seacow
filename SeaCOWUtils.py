@@ -18,6 +18,9 @@ def cow_region_to_conc(region, attrs = True):
     conc = [flatten(x) for x in conc]
     conc = filter(lambda x: x not in [['strc'], ['attr']], conc)
     conc = [filter(None, filter(lambda x: x != '{}', x)) for x in conc]
+
+  # Fix UTF-8 mess.
+  conc = [[x.decode('utf-8') for x in xs] for xs in conc]
   return conc
 
 

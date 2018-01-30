@@ -126,7 +126,6 @@ class Query:
       cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
       cont_end_pos = h_cont.end(cont_end_num)                   # Pos at container end.
 
-      # TODO RS Memory and time (likely malloc, CPU load actually *lower*) lost in next 2 lines!
       refs = [h_refs[i].pos2str(kwic_beg) for i in range(0, len(h_refs))]
       region = h_region.region(cont_beg_pos, cont_end_pos, '\t', '\t')
 
@@ -232,10 +231,9 @@ class ConcordanceWriter(Processor):
 
     # Write meta, left, match, right.
     self.handle.write('\t'.join(meta) + '\t')
-    self.handle.write(' '.join(['|'.join(token) for token in line[:match_start]]) + '\t')
-    self.handle.write(' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t')
-    self.handle.write(' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n')
-
+    self.handle.write((' '.join(['|'.join(token) for token in line[:match_start]]) + '\t').encode('utf-8'))
+    self.handle.write((' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t').encode('utf-8'))
+    self.handle.write((' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n').encode('utf-8'))
 
 
 
@@ -265,11 +263,14 @@ class DependencyBuilder(Processor):
     if self.saveimage and not self.imagemetaid1:
       raise ProcessorError('You cannot save to image files without setting at least imagemetaid1.')
 
+    if not (self.column_token, self.column_index and self.column_head and self.column_relation):
+      raise ProcessorError('You have to set the column indices for the dependency information.')
+
     self.has_attributes = True if len(query.attributes) > 1 else False
     self.rex            = re.compile('^<.+>$')
 
     if self.savejson:
-      self.exporter = JsonExporter(indent=2, sort_keys=True)
+      self.exporter = JsonExporter(indent = 2, sort_keys = False)
       self.writer = open(self.fileprefix + '.json', 'w')
 
   def finalise(self, query):
@@ -283,9 +284,6 @@ class DependencyBuilder(Processor):
     return False
 
   def process(self, query, region, meta, match_offset, match_length):
-
-    if not (self.column_token, self.column_index and self.column_head and self.column_relation):
-      raise ProcessorError('You have to set the column indices for the dependency information.')
 
     # Turn Mantee stuff into usable structure.
     line         = cow_region_to_conc(region, self.has_attributes)
@@ -305,14 +303,15 @@ class DependencyBuilder(Processor):
     for n in nodes[1:]:
       n.parent = next((x for x in nodes if x.name == n.head), None)
 
-    # If a descendant implements the filter, only certain structures will be
-    # processed further.
+    # If a descendant implements the filter, certain structures can be
+    # discarded.
     if self.filtre(nodes[0], line):
       return
 
     # Export as desired. Three independent formats.
     if self.printtrees:
-      print(RenderTree(nodes[0]))
+      for pre, _, node in RenderTree(nodes[0]):
+        print("%s%s (%s)" % (pre, node.token, node.name))
 
     if self.savejson:
       self.exporter.write(nodes[0], self.writer)
