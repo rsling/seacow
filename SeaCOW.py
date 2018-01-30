@@ -9,19 +9,13 @@ import re
 from time import gmtime, strftime
 import pybloom_live
 from anytree import Node, RenderTree
-from anytree.exporter import DotExporter
+from anytree.exporter import DotExporter, JsonExporter
 from SeaCOWUtils import isplit, flatten, cow_region_to_conc
 
 
 
 if not os.environ.get('MANATEE_REGISTRY'):
   os.environ['MANATEE_REGISTRY'] = '/var/lib/manatee/registry'
-
-DEFAULT_CORPUS     = 'decow16a-nano'
-DEFAULT_ATTRIBUTES = ['word', 'tag', 'lemma', 'depind', 'dephd', 'deprel']
-DEFAULT_STRUCTURES = ['s', 'nx']
-DEFAULT_REFERENCES = ['doc.url', 'doc.bdc', 'doc.tld', 'doc.id', 'div.bpc', 's.idx', 's.type']
-DEFAULT_CONTAINER  = 's'
 
 
 
@@ -48,11 +42,11 @@ class Query:
   """SeaCOW query class"""
 
   def __init__(self):
-    self.corpus        = DEFAULT_CORPUS
-    self.attributes    = DEFAULT_ATTRIBUTES
-    self.structures    = DEFAULT_STRUCTURES
-    self.references    = DEFAULT_REFERENCES
-    self.container     = DEFAULT_CONTAINER
+    self.corpus        = None
+    self.attributes    = None
+    self.structures    = None
+    self.references    = None
+    self.container     = None
     self.string        = None
     self.max_hits      = -1
     self.random_subset = -1
@@ -79,6 +73,16 @@ class Query:
   def run(self):
 
     # Check whether query is prepared.
+    if self.corpus is None:
+      raise QueryError('You must specify the corpus to do a search.')
+    if self.attributes is None:
+      raise QueryError('You must specify at least one attribute to do a search.')
+    if self.structures is None:
+      raise QueryError('You must specify at least one structure to do a search.')
+    if self.references is None:
+      raise QueryError('You must specify at least one reference to do a search.')
+    if self.container  is None:
+      raise QueryError('You must specify the container to do a search.')
     if self.string is None or self.string is '':
       raise QueryError('You must set the string property to a search string.')
 
@@ -161,7 +165,7 @@ class Processor(object):
   """SeaCOW processor class"""
 
   def __init__(self):
-    raise Exception('You cannot use the Processor class directly. Please implement an descendant!')
+    raise Exception('You cannot use the Processor class directly. Please implement a descendant!')
 
   def prepare(self, query):
     print "You are calling a Processor with an unimplemented prepare() method: " + str(type(self))
@@ -239,7 +243,7 @@ def edgeattrfunc(node, child):
   return 'label="%s"' % (child.relation)
 
 def nodenamefunc(node):
-  return '%s' % (node.token)
+  return '%s(%s)' % (node.token, node.linear)
 
 class DependencyBuilder(Processor):
   """SeaCOW processor class for concordance writing"""
@@ -249,16 +253,34 @@ class DependencyBuilder(Processor):
     self.column_head     = None
     self.column_relation = None
     self.column_token    = None
+    self.fileprefix      = None
+    self.savejson        = False
+    self.saveimage       = None   # others: 'png' or 'dot'
+    self.printtrees      = False
+    self.imagemetaid1    = None
+    self.imagemetaid2    = None
 
   def prepare(self, query):
+
+    if self.saveimage and not self.imagemetaid1:
+      raise ProcessorError('You cannot save to image files without setting at least imagemetaid1.')
+
     self.has_attributes = True if len(query.attributes) > 1 else False
     self.rex            = re.compile('^<.+>$')
+
+    if self.savejson:
+      self.exporter = JsonExporter(indent=2, sort_keys=True)
+      self.writer = open(self.fileprefix + '.json', 'w')
 
   def finalise(self, query):
     return True
 
-  def filter(self, tree):
-    return True
+    if self.savejson:
+      self.writer.close()
+
+
+  def filtre(self, tree, line):
+    return False
 
   def process(self, query, region, meta, match_offset, match_length):
 
@@ -271,9 +293,10 @@ class DependencyBuilder(Processor):
     # Find true tokens via indices (not structs) for separating match from context.
     # Turn everything into nodes already - to be linked into tree in next step.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
-    nodes        = [Node("0", token = "TOP", relation = "", head = "", linear = 0)] + \
+    nodes        = [Node("0", token = "TOP", relation = "", head = "", linear = 0, meta = dict(zip(query.references, meta))),] + \
                      [Node(line[x][self.column_index],
                      token    = line[x][self.column_token],
+                     attribs  = dict(zip([query.attributes[a] for a in self.attribs], [line[x][a] for a in self.attribs])),
                      relation = line[x][self.column_relation],
                      head     = line[x][self.column_head],
                      linear   = int(line[x][self.column_index])) for x in indices]
@@ -282,8 +305,25 @@ class DependencyBuilder(Processor):
     for n in nodes[1:]:
       n.parent = next((x for x in nodes if x.name == n.head), None)
 
-    print
-    print(RenderTree(nodes[0]))
-    DotExporter(nodes[0], edgeattrfunc = edgeattrfunc, nodenamefunc = nodenamefunc).to_picture("test.png")
-    print
+    # If a descendant implements the filter, only certain structures will be
+    # processed further.
+    if self.filtre(nodes[0], line):
+      return
+
+    # Export as desired. Three independent formats.
+    if self.printtrees:
+      print(RenderTree(nodes[0]))
+
+    if self.savejson:
+      self.exporter.write(nodes[0], self.writer)
+
+    if self.saveimage:
+      fnam = self.fileprefix + '_' + meta[self.imagemetaid1]
+      if self.imagemetaid2:
+        fnam = fnam + '_' + meta[self.imagemetaid2]
+      if self.saveimage is 'dot':
+        DotExporter(nodes[0]).to_dotfile(fnam + '.dot')
+      elif self.saveimage is 'png':
+        DotExporter(nodes[0], edgeattrfunc = edgeattrfunc, nodenamefunc = nodenamefunc).to_picture(fnam + '.png')
+
 
