@@ -103,7 +103,7 @@ This is a base class which only writes trees to the terminal, stores them as JSO
 * `column_token` The 0-based index into the attribute list, locating the token (see in `Query.attributes` where you specified something like `'word'`).
 * `fileprefix` The path prefix defining the location where the (potentially many) data files will be saved.
 * `savejson` Set `True` to export full JSON for dependency trees (including meta data). One large file.
-* `saveimage` Set to `'dot'` to export Graphviz DOT files, `'png'` to export PNG files, `None` to export no graphics files of dependency trees. *ATTENTION! Creates one file per hit!*
+* `saveimage` Set to `'dot'` to export Graphviz DOT files, `'png'` to export PNG files, `None` to export no graphics files of dependency trees. **ATTENTION! Creates one file per hit!**
 * `printtrees` Set to `True` to output ASCII renderings of trees at the terminal while processing.
 * `imagemetaid1` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, first part. Recommended: `doc.id`. See `Query.references` for where you put the reference attributes in the list.
-* `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. *NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.*
+* `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. **NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.**
