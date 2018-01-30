@@ -8,7 +8,11 @@ import sys
 import re
 from time import gmtime, strftime
 import pybloom_live
+from anytree import Node, RenderTree
+from anytree.exporter import DotExporter
 from SeaCOWUtils import isplit, flatten, cow_region_to_conc
+
+
 
 if not os.environ.get('MANATEE_REGISTRY'):
   os.environ['MANATEE_REGISTRY'] = '/var/lib/manatee/registry'
@@ -19,11 +23,25 @@ DEFAULT_STRUCTURES = ['s', 'nx']
 DEFAULT_REFERENCES = ['doc.url', 'doc.bdc', 'doc.tld', 'doc.id', 'div.bpc', 's.idx', 's.type']
 DEFAULT_CONTAINER  = 's'
 
-class QueryNotPrepared(Exception):
+
+
+class QueryError(Exception):
   def __init__(self, value):
     self.value = value
   def __str__(self):
     return repr(self.value)
+
+
+
+
+class ProcessorError(Exception):
+  def __init__(self, value):
+    self.value = value
+  def __str__(self):
+    return repr(self.value)
+
+
+
 
 
 class Query:
@@ -62,11 +80,11 @@ class Query:
 
     # Check whether query is prepared.
     if self.string is None or self.string is '':
-      raise QueryNotPrepared('You must set the string property to a search string.')
+      raise QueryError('You must set the string property to a search string.')
 
     # Check whether processor of proper type
     if self.processor and not issubclass(type(self.processor), Processor):
-      raise QueryNotPrepared('The processor class must inherit from SeaCOW.Processor.')
+      raise QueryError('The processor class must inherit from SeaCOW.Processor.')
 
     # Allow the processor to engage in preparatory action/check whether everything is fine.
     if self.processor:
@@ -136,20 +154,26 @@ class Query:
       self.processor.finalise(self)
 
 
+
+
+
 class Processor(object):
   """SeaCOW processor class"""
 
   def __init__(self):
-    raise Exception('You cannot use the Processor class directly. Implement an ancestor!')
+    raise Exception('You cannot use the Processor class directly. Please implement an descendant!')
 
   def prepare(self, query):
-    print "You are calling a processor with unimplemented methods: " + str(type(self))
+    print "You are calling a Processor with an unimplemented prepare() method: " + str(type(self))
 
   def finalise(self, query):
-    print "You are calling a processor with unimplemented methods: " + str(type(self))
+    print "You are calling a Processor with an unimplemented finalise() method: " + str(type(self))
 
   def process(self, query, region, meta, match_offset, match_length):
-    print "You are calling a processor with unimplemented methods: " + str(type(self))
+    print "You are calling a Processor with an unimplemented process() method: " + str(type(self))
+
+
+
 
 
 class ConcordanceWriter(Processor):
@@ -159,7 +183,6 @@ class ConcordanceWriter(Processor):
     self.filename = None
 
   def prepare(self, query):
-    print self.filename
     self.handle         = open(self.filename, 'w') if self.filename else sys.stdout
     self.has_attributes = True if len(query.attributes) > 1 else False
     self.rex            = re.compile('^<.+>$')
@@ -208,3 +231,59 @@ class ConcordanceWriter(Processor):
     self.handle.write(' '.join(['|'.join(token) for token in line[:match_start]]) + '\t')
     self.handle.write(' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t')
     self.handle.write(' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n')
+
+
+
+
+def edgeattrfunc(node, child):
+  return 'label="%s"' % (child.relation)
+
+def nodenamefunc(node):
+  return '%s' % (node.token)
+
+class DependencyBuilder(Processor):
+  """SeaCOW processor class for concordance writing"""
+
+  def __init__(self):
+    self.column_index    = None
+    self.column_head     = None
+    self.column_relation = None
+    self.column_token    = None
+
+  def prepare(self, query):
+    self.has_attributes = True if len(query.attributes) > 1 else False
+    self.rex            = re.compile('^<.+>$')
+
+  def finalise(self, query):
+    return True
+
+  def filter(self, tree):
+    return True
+
+  def process(self, query, region, meta, match_offset, match_length):
+
+    if not (self.column_token, self.column_index and self.column_head and self.column_relation):
+      raise ProcessorError('You have to set the column indices for the dependency information.')
+
+    # Turn Mantee stuff into usable structure.
+    line         = cow_region_to_conc(region, self.has_attributes)
+
+    # Find true tokens via indices (not structs) for separating match from context.
+    # Turn everything into nodes already - to be linked into tree in next step.
+    indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
+    nodes        = [Node("0", token = "TOP", relation = "", head = "", linear = 0)] + \
+                     [Node(line[x][self.column_index],
+                     token    = line[x][self.column_token],
+                     relation = line[x][self.column_relation],
+                     head     = line[x][self.column_head],
+                     linear   = int(line[x][self.column_index])) for x in indices]
+
+    # Build tree from top.
+    for n in nodes[1:]:
+      n.parent = next((x for x in nodes if x.name == n.head), None)
+
+    print
+    print(RenderTree(nodes[0]))
+    DotExporter(nodes[0], edgeattrfunc = edgeattrfunc, nodenamefunc = nodenamefunc).to_picture("test.png")
+    print
+
