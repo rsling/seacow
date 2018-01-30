@@ -45,6 +45,31 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 Performs queries and pipes the data into a processor.
 
+#### Attributes
+
+* ```corpus``` The string which identifies the corpus (lower case), such as `'decow16a-nano'`.
+* ```attributes``` A list of attributes of tokens to be exported, such as `['token', 'tag', 'lemma']`.
+* ```structures``` A list of structures to be exported, such as `['s', 'nx']`.
+* ```references``` A list of reference attributes to be exported, such as `['doc.id', 'doc.url', 's.idx']`.
+* ```container``` The container structure to be exported, such as `'s'`
+* ```string``` The query string, such as `'[lemma="Chuzpe"]'`
+* ```max_hits``` The maximum number of hits to be exported.
+* ```random_subset``` A float between 0 and 1 representing the proportion of hits to be exported (chosen randomly).
+* ```context_left``` The number of `container` structures to be exported to the left of the matching one.
+* ```context_right``` The number of `container` structures to be exported to the right of the matching one.
+* ```processor``` The processor object which takes care of the returned results.
+
+#### Methods
+
+```set_deduplication(self, off = False)```
+
+Enable or disable deduplication of concordances based on a bloom filter. Call without argument to activate filter.
+
+```run(self)```
+
+Execute the query and process the results after everything has been set up.
+
+
 ```Processor(object)```
 
 The 'abstract' class from which processors should be derived.
