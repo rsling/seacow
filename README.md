@@ -39,5 +39,22 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 * `attrs` Set this to `True` if your concordance contains no structures and only one positional attribute (pure token stream).
 
-
 ### Classes
+
+```Query(object)```
+
+Performs queries and pipes the data into a processor.
+
+```Processor(object)```
+
+The 'abstract' class from which processors should be derived.
+
+```ConcordanceWriter(Processor)```
+
+A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
+
+```DependencyBuilder(Processor)```
+
+A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format).
+
+This is a base class which only writes trees to the terminal, stores them as JSON, or draws Graphviz graphs to DOT or PNG files. Intended for refinement in custom classes.
