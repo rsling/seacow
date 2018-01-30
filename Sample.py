@@ -46,7 +46,7 @@ p.savejson        = True
 p.saveimage       = 'png'
 p.imagemetaid1    = 3
 p.imagemetaid2    = 5
-p.printtrees      = True
+p.printtrees      = False
 q.processor       = p
 
 q.run()
