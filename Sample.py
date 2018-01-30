@@ -14,9 +14,13 @@ q.structures      = ['s']
 q.references      = ['doc.url', 'doc.bdc', 'doc.tld', 'doc.id', 'div.bpc', 's.idx', 's.type']
 q.container       = 's'
 
+# This enables an efficient duplicate remover using a scaling Bloom filter.
 q.set_deduplication()
 
 # Create a Processor object and attach it to the Query object.
+# The ConcordanceWriter processor just writes a nice CSV file
+# containing your concordance, incl. all meta data you need
+# as comments at the top and bottom of the table.
 p                 = ConcordanceWriter()
 p.filename        = 'data/hausfrau.csv'
 q.processor       = p
@@ -27,6 +31,9 @@ q.run()
 # SECOND QUERY.
 
 # You can then even attach a differen Processor and run the query again.
+# The dependency builder reconstructs (and outputs) dependency trees.
+# If you want to filter structures, create a class which inherits from
+# DependencyBuilder and override the filtre() method (NO TYPO there).
 q.attributes      = ['word', 'depind', 'dephd', 'deprel', 'tag', 'lemma']
 p                 = DependencyBuilder()
 p.column_token    = 0
