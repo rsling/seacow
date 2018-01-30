@@ -39,17 +39,8 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 ## Classes
 
-<<<<<<< HEAD
 ### Query
-=======
-```python
-Query(object)
-```
->>>>>>> 784e579749bef341aeda13f584158ca7ed720d13
 
-```python
-Query(object)
-```
 Performs queries and pipes the data into a processor.
 
 #### Attributes
@@ -78,35 +69,15 @@ Execute the query and process the results after everything has been set up.
 
 ### Processor
 
-```python
-Processor(object)
-```
-<<<<<<< HEAD
 The 'abstract' class from which processors should be derived.
 
 
 ### ConcordanceWriter
 
-=======
-
-The 'abstract' class from which processors should be derived.
-
->>>>>>> 784e579749bef341aeda13f584158ca7ed720d13
-```python
-ConcordanceWriter(Processor)
-```
-
 A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
 
-<<<<<<< HEAD
 
 ### DependencyBuilder
-
-=======
->>>>>>> 784e579749bef341aeda13f584158ca7ed720d13
-```python
-DependencyBuilder(Processor)
-```
 
 A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format).
 
