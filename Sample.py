@@ -30,7 +30,7 @@ q.run()
 
 # SECOND QUERY.
 
-# You can then even attach a differen Processor and run the query again.
+# You can then even attach a different Processor and run the query again.
 # The dependency builder reconstructs (and outputs) dependency trees.
 # If you want to filter structures, create a class which inherits from
 # DependencyBuilder and override the filtre() method (NO TYPO there).
