@@ -27,9 +27,7 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 4. Set the processor as the processor attribute of the query object.
 5. Call the query's run method.
 
-## Documentation
-
-### Functions
+## Functions
 
 ```python
 cow_region_to_conc(region, attrs = True)
@@ -39,10 +37,13 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 * `attrs` Set this to `True` if your concordance contains no structures and only one positional attribute (pure token stream).
 
-### Classes
+## Classes
 
-```Query(object)```
+### Query
 
+```python
+Query(object)
+```
 Performs queries and pipes the data into a processor.
 
 #### Attributes
@@ -69,16 +70,28 @@ Enable or disable deduplication of concordances based on a bloom filter. Call wi
 
 Execute the query and process the results after everything has been set up.
 
+### Processor
 
-```Processor(object)```
-
+```python
+Processor(object)
+```
 The 'abstract' class from which processors should be derived.
 
-```ConcordanceWriter(Processor)```
+
+### ConcordanceWriter
+
+```python
+ConcordanceWriter(Processor)
+```
 
 A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
 
-```DependencyBuilder(Processor)```
+
+### DependencyBuilder
+
+```python
+DependencyBuilder(Processor)
+```
 
 A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format).
 
