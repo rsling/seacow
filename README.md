@@ -33,9 +33,7 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 cow_region_to_conc(region, attrs = True)
 ```
 
-Formats a Manatee region (as returned within Query objects and passed to Processor objects) to a usable structure. Decodes UTF-8.
-
-* `attrs` Set this to `True` if your concordance contains no structures and only one positional attribute (pure token stream).
+Formats a Manatee region (as returned within Query objects and passed to Processor objects) to a usable structure. Decodes UTF-8. Set `attrs` to `True` if your concordance contains no structures and only one positional attribute (pure token stream).
 
 ## Classes
 
@@ -69,9 +67,9 @@ Execute the query and process the results after everything has been set up.
 
 ### Processor
 
-The 'abstract' class from which processors should be derived. You must override all methods.
+The 'abstract' class from which processors should be derived.
 
-#### Methods
+#### Methods (You must override all of these.)
 
 * `__init__(self)` Standard init.
 * `prepare(self, query)` Code executed before the query results are processed.
@@ -91,9 +89,7 @@ A Processor which writes results of a query into a nicely fromatted CSV file (or
 
 ### DependencyBuilder
 
-A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format).
-
-This is a base class which only writes trees to the terminal, stores them as JSON, or draws Graphviz graphs to DOT or PNG files. Intended for refinement in custom classes.
+A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format). This is a base class which only writes trees to the terminal, stores them as JSON, or draws Graphviz graphs to DOT or PNG files. Intended for refinement in custom classes.
 
 #### Attributes
 
