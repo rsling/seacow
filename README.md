@@ -21,11 +21,11 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 
 ## Use
 
-1. Create a SeaCOW.Query object.
-2. Set the relevant attributes, including search string.
-3. Create a descendant of SeaCOW.Processor and set its attributes.
+1. Create a `SeaCOW.Query` object.
+2. Set the relevant attributes, including search string (see below).
+3. Create an object of a descendant class of `SeaCOW.Processor` and set its attributes.
 4. Set the processor as the processor attribute of the query object.
-5. Call the query's run method.
+5. Call the query's `run()` method.
 
 ## Functions
 
