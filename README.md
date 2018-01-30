@@ -11,7 +11,7 @@
 - If you want custom processing, create an implementation
   of the Processor class.
 - Included are two processors: ConcordanceWriter and 
-  DependencyTreeMaker.
+  DependencyBuilder.
 
 ## Installation
 
