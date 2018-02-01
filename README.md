@@ -38,6 +38,11 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 
 ### Query
 
+```python
+Query(object)
+```
+
+
 Performs queries and pipes the data into a processor.
 
 #### Attributes
