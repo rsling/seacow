@@ -97,6 +97,10 @@ A Processor which writes results of a query into a nicely fromatted CSV file (or
 
 ### DependencyBuilder
 
+```python
+DependencyBuilder(Processor)
+```
+
 A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format). This is a base class which only writes trees to the terminal, stores them as JSON, or draws Graphviz graphs to DOT or PNG files. Intended for refinement in custom classes.
 
 #### Attributes
