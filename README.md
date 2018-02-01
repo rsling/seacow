@@ -6,12 +6,9 @@
 
 - SeaCOW is a class-based rewrite of the old ManaCOW project.
 - It uses an efficient Bloom filter for deduplication.
-- It does not create huge memory structures but processes
-  concordances on the fly.
-- If you want custom processing, create an implementation
-  of the Processor class.
-- Included are two processors: ConcordanceWriter and 
-  DependencyBuilder.
+- It does not create huge memory structures but processes concordances on the fly.
+- If you want custom processing, create an implementation of the Processor class.
+- Included are two processors: ConcordanceWriter and   DependencyBuilder.
 
 ## Installation
 
@@ -26,6 +23,8 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 3. Create an object of a descendant class of `SeaCOW.Processor` and set its attributes.
 4. Set the processor as the processor attribute of the query object.
 5. Call the query's `run()` method.
+
+**NOTE! This is currently Python 2.7 only. Please get in contact with us if you need Python 3, and we will asssist you in creating a Python 3 version.**
 
 ## Functions
 
@@ -67,6 +66,10 @@ Execute the query and process the results after everything has been set up.
 
 ### Processor
 
+```python
+Processor(object)
+```
+
 The 'abstract' class from which processors should be derived.
 
 #### Methods (You must override all of these.)
@@ -78,7 +81,12 @@ The 'abstract' class from which processors should be derived.
 
 
 
-### ConcordanceWriter(Processor)
+### ConcordanceWriter
+
+
+```python
+ConcordanceWriter(Processor)
+```
 
 A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
 
