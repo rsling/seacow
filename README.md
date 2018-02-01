@@ -1,4 +1,4 @@
-# SeacCOW, the COW wrapper for the Manatee library
+# SeaCOW, the COW wrapper for the Manatee library
 
 ![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/sample.png)
 
