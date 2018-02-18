@@ -241,7 +241,10 @@ def edgeattrfunc(node, child):
   return 'label="%s"' % (child.relation)
 
 def nodenamefunc(node):
-  return '%s(%s)' % (node.token, node.linear)
+  return '%s(%s)' % (make_token_safe(node.token), node.linear)
+
+def make_token_safe(token):
+  return(token.replace('"', 'DQUOTES').replace("'", 'SQUOTES'))
 
 class DependencyBuilder(Processor):
   """SeaCOW processor class for concordance writing"""
@@ -292,12 +295,12 @@ class DependencyBuilder(Processor):
     # Turn everything into nodes already - to be linked into tree in next step.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
     nodes        = [Node("0", token = "TOP", relation = "", head = "", linear = 0, meta = dict(zip(query.references, meta))),] + \
-                     [Node(line[x][self.column_index],
+                     [Node(make_token_safe(line[x][self.column_index]),
                      token    = line[x][self.column_token],
-                     attribs  = dict(zip([query.attributes[a] for a in self.attribs], [line[x][a] for a in self.attribs])),
                      relation = line[x][self.column_relation],
                      head     = line[x][self.column_head],
-                     linear   = int(line[x][self.column_index])) for x in indices]
+                     linear   = int(line[x][self.column_index]),
+                     **dict(zip([query.attributes[a] for a in self.attribs], [line[x][a] for a in self.attribs])) ) for x in indices]
 
     # Build tree from top.
     for n in nodes[1:]:
@@ -305,7 +308,7 @@ class DependencyBuilder(Processor):
 
     # If a descendant implements the filter, certain structures can be
     # discarded.
-    if not self.filtre(nodes[0], line):
+    if not self.filtre(nodes, line):
       return
 
     # Export as desired. Three independent formats.
