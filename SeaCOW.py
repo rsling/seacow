@@ -281,7 +281,7 @@ class DependencyBuilder(Processor):
 
 
   def filtre(self, tree, line):
-    return False
+    return True
 
   def process(self, query, region, meta, match_offset, match_length):
 
@@ -305,7 +305,7 @@ class DependencyBuilder(Processor):
 
     # If a descendant implements the filter, certain structures can be
     # discarded.
-    if self.filtre(nodes[0], line):
+    if not self.filtre(nodes[0], line):
       return
 
     # Export as desired. Three independent formats.
