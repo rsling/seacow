@@ -6,13 +6,14 @@ from SeaCOW import Query, ConcordanceWriter, DependencyBuilder
 
 # Create a Query object and set whatever needs to be set.
 q = Query()
-q.corpus          = 'decow16a-nano'
-q.string          = '[word="Hausfrau"]'
-q.max_hits        = 10
-q.attributes      = ['word']
-q.structures      = ['s']
+q.corpus          = 'decow16a-nano'         # Lower-case name of the corpusto use.
+q.string          = '[word="Hausfrau"]'     # A normal CQL string as used in NoSketchEngine.
+q.max_hits        = 10                      # Maximal number of hits to return. Use when testing queries!
+q.attributes      = ['word']                # Attributes (of tokens) to export from corpus.
+q.structures      = ['s']                   # Structure markup to export from corpus.
 q.references      = ['doc.url', 'doc.bdc', 'doc.tld', 'doc.id', 'div.bpc', 's.idx', 's.type']
-q.container       = 's'
+                                            # Which reference attributes (of structures) to export.
+q.container       = 's'                     # Which container strutcure should be exported?
 
 # This enables an efficient duplicate remover using a scaling Bloom filter.
 q.set_deduplication()
@@ -21,12 +22,12 @@ q.set_deduplication()
 # The ConcordanceWriter processor just writes a nice CSV file
 # containing your concordance, incl. all meta data you need
 # as comments at the top and bottom of the table.
-p                 = ConcordanceWriter()
-p.filename        = 'data/hausfrau.csv'
-q.processor       = p
+p                 = ConcordanceWriter() # Create a processor object of apporpriate type.
+p.filename        = 'data/hausfrau.csv' # File name prefix for output data. Directories MUST EXIST!
+q.processor       = p                   # Attach the processor to the query.
+q.run()                                 # Run the query.
 
-# Run the actual query.
-q.run()
+
 
 # SECOND QUERY.
 
@@ -36,17 +37,21 @@ q.run()
 # DependencyBuilder and override the filtre() method (NO TYPO there).
 q.attributes      = ['word', 'depind', 'dephd', 'deprel', 'tag', 'lemma']
 p                 = DependencyBuilder()
-p.column_token    = 0
-p.column_index    = 1
-p.column_head     = 2
-p.column_relation = 3
-p.attribs         = [4,5]
-p.fileprefix      = 'data/hausfrau'
-p.savejson        = True
-p.saveimage       = 'png'
-p.imagemetaid1    = 3
-p.imagemetaid2    = 5
-p.printtrees      = False
-q.processor       = p
 
-q.run()
+                                        # The following five are 0-based indeces into q.attributes as defined above.
+p.column_token    = 0                   # Which column contains the token?
+p.column_index    = 1                   # Which column contains the dependency index?
+p.column_head     = 2                   # Which column contains the dependency head index?
+p.column_relation = 3                   # Which column contains the dependency relation?
+p.attribs         = [4,5]               # A list of additional attributes to copy to the tree nodes.
+
+p.fileprefix      = 'data/hausfrau'     # File name prefix for output data. Directories MUST EXIST!
+p.savejson        = True                # Whether a JSON file should be saved.
+p.saveimage       = 'png'               # Whether ONE PNG FILE PER FOUND TREE should be written.
+                                        # None: Don't write anything. 'png' or 'dot': write files of respective type.
+p.imagemetaid1    = 3                   # Attribute which serves as first file name component for graphics files.
+p.imagemetaid2    = 5                   # Attribute which serves as second file name component for graphics files. (OPTIONAL)
+p.printtrees      = False               # Print all trees using ASCII to stdout?
+
+q.processor       = p                   # Attach the processor to the query.
+q.run()                                 # Run the query.
