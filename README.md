@@ -1,4 +1,4 @@
-# SeacCOW, the COW wrapper for the Manatee library
+# SeaCOW, the COW wrapper for the Manatee library
 
 ![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/sample.png)
 
@@ -6,12 +6,9 @@
 
 - SeaCOW is a class-based rewrite of the old ManaCOW project.
 - It uses an efficient Bloom filter for deduplication.
-- It does not create huge memory structures but processes
-  concordances on the fly.
-- If you want custom processing, create an implementation
-  of the Processor class.
-- Included are two processors: ConcordanceWriter and 
-  DependencyBuilder.
+- It does not create huge memory structures but processes concordances on the fly.
+- If you want custom processing, create an implementation of the Processor class.
+- Included are two processors: ConcordanceWriter and   DependencyBuilder.
 
 ## Installation
 
@@ -27,6 +24,8 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 4. Set the processor as the processor attribute of the query object.
 5. Call the query's `run()` method.
 
+**NOTE! This is currently Python 2.7 only. Please get in contact with us if you need Python 3, and we will asssist you in creating a Python 3 version.**
+
 ## Functions
 
 ```python
@@ -38,6 +37,11 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 ## Classes
 
 ### Query
+
+```python
+Query(object)
+```
+
 
 Performs queries and pipes the data into a processor.
 
@@ -67,6 +71,10 @@ Execute the query and process the results after everything has been set up.
 
 ### Processor
 
+```python
+Processor(object)
+```
+
 The 'abstract' class from which processors should be derived.
 
 #### Methods (You must override all of these.)
@@ -78,7 +86,12 @@ The 'abstract' class from which processors should be derived.
 
 
 
-### ConcordanceWriter(Processor)
+### ConcordanceWriter
+
+
+```python
+ConcordanceWriter(Processor)
+```
 
 A Processor which writes results of a query into a nicely fromatted CSV file (or to the terminal).
 
@@ -88,6 +101,10 @@ A Processor which writes results of a query into a nicely fromatted CSV file (or
 
 
 ### DependencyBuilder
+
+```python
+DependencyBuilder(Processor)
+```
 
 A Processor which re-creates dependency information contained in COW corpora and represents it as trees (in [anytree](https://pypi.python.org/pypi/anytree) format). This is a base class which only writes trees to the terminal, stores them as JSON, or draws Graphviz graphs to DOT or PNG files. Intended for refinement in custom classes.
 
