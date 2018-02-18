@@ -1,6 +1,6 @@
 # SeaCOW, the COW wrapper for the Manatee library
 
-![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/sample.png)
+![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/samples/sample.png)
 
 ## Features
 
@@ -17,6 +17,8 @@ We currently do not support or recommend installing it. In any case, you need a 
 Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 
 ## Use
+
+Also see samples folder for some sample code.
 
 1. Create a `SeaCOW.Query` object.
 2. Set the relevant attributes, including search string (see below).
