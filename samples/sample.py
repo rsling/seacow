@@ -23,7 +23,8 @@ q.set_deduplication()
 # containing your concordance, incl. all meta data you need
 # as comments at the top and bottom of the table.
 p                 = ConcordanceWriter() # Create a processor object of apporpriate type.
-p.filename        = 'data/hausfrau.csv' # File name prefix for output data. Directories MUST EXIST!
+p.filename        = 'data/hausfrau/hausfrau.csv'
+                                        # File name prefix for output data. Directories MUST EXIST!
 q.processor       = p                   # Attach the processor to the query.
 q.run()                                 # Run the query.
 
@@ -45,7 +46,8 @@ p.column_head     = 2                   # Which column contains the dependency h
 p.column_relation = 3                   # Which column contains the dependency relation?
 p.attribs         = [4,5]               # A list of additional attributes to copy to the tree nodes.
 
-p.fileprefix      = 'data/hausfrau'     # File name prefix for output data. Directories MUST EXIST!
+p.fileprefix      = 'data/hausfrau/hausfrau'
+                                        # File name prefix for output data. Directories MUST EXIST!
 p.savejson        = True                # Whether a JSON file should be saved.
 p.saveimage       = 'png'               # Whether ONE PNG FILE PER FOUND TREE should be written.
                                         # None: Don't write anything. 'png' or 'dot': write files of respective type.
