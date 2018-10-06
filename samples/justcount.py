@@ -24,5 +24,7 @@ p                 = Nonprocessor()  # Create a processor object of apporpriate t
 q.processor       = p               # Attach the processor to the query.
 q.run()                             # Run the query.
 
+print('Query was: %s' % (q.string))
+print('Corpus used: %s' % (q.corpus))
 print('Query returned %d hits.' % (q.hitcount))
 
