@@ -47,6 +47,12 @@ Query(object)
 
 Performs queries and pipes the data into a processor.
 
+#### Noteas about Nonprocessor as processor attribute!
+
+If you pass an instance of `Nonprocessor` as the processor attribute, `Query` will call the `prepare()` and `finalise()` methods as usual. However, the stream returned by Manatee will not be processed and the `process()` method is not called once. Except for `corpus` and `string` you don't need to set any attributes. Even `container` can be left unset.
+
+Using a `Nonprocessor` is intended for those who only want to read the `hitcount` attribute after Manatee has executed the query (like Manatee's own `corpquery -n`).
+
 #### Attributes
 
 * ```corpus``` The string which identifies the corpus (lower case), such as `'decow16a-nano'`.
@@ -60,6 +66,7 @@ Performs queries and pipes the data into a processor.
 * ```context_left``` The number of `container` structures to be exported to the left of the matching one.
 * ```context_right``` The number of `container` structures to be exported to the right of the matching one.
 * ```processor``` The processor object which takes care of the returned results.
+* ```hitcount``` Contains the concordance size as reported by Manatee. Only available after run() has been called. This is always without deduplication.
 
 #### Methods
 
@@ -122,3 +129,13 @@ A Processor which re-creates dependency information contained in COW corpora and
 * `printtrees` Set to `True` to output ASCII renderings of trees at the terminal while processing.
 * `imagemetaid1` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, first part. Recommended: `doc.id`. See `Query.references` for where you put the reference attributes in the list.
 * `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. **NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.**
+
+### ConcordanceWriter
+
+
+```python
+Nonprocessor(Processor)
+```
+
+A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.hitcount after executing a query if you just need query result counts. See Query() documentation about the implications.
+
