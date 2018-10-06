@@ -44,18 +44,15 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 Query(object)
 ```
 
-
 Performs queries and pipes the data into a processor.
 
-<<<<<<< HEAD
+
 #### Notes on using `Nonprocessor` instances with `Query`!
-=======
-#### Noteas about Nonprocessor as processor attribute!
->>>>>>> 4a648d82a2ff271aeccea9718b8e56c0b6a592a3
 
 If you pass an instance of `Nonprocessor` as the processor attribute, `Query` will call the `prepare()` and `finalise()` methods as usual. However, the stream returned by Manatee will not be processed and the `process()` method is not called once. Except for `corpus` and `string` you don't need to set any attributes. Even `container` can be left unset.
 
 Using a `Nonprocessor` is intended for those who only want to read the `hitcount` attribute after Manatee has executed the query (like Manatee's own `corpquery -n`).
+
 
 #### Attributes
 
@@ -134,16 +131,8 @@ A Processor which re-creates dependency information contained in COW corpora and
 * `imagemetaid1` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, first part. Recommended: `doc.id`. See `Query.references` for where you put the reference attributes in the list.
 * `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. **NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.**
 
-### ConcordanceWriter
 
-
-<<<<<<< HEAD
 ### Nonprocessor(Processor)
-=======
-```python
-Nonprocessor(Processor)
-```
->>>>>>> 4a648d82a2ff271aeccea9718b8e56c0b6a592a3
 
 A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.hitcount after executing a query if you just need query result counts. See Query() documentation about the implications.
 
