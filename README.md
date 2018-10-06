@@ -47,7 +47,11 @@ Query(object)
 
 Performs queries and pipes the data into a processor.
 
+<<<<<<< HEAD
 #### Notes on using `Nonprocessor` instances with `Query`!
+=======
+#### Noteas about Nonprocessor as processor attribute!
+>>>>>>> 4a648d82a2ff271aeccea9718b8e56c0b6a592a3
 
 If you pass an instance of `Nonprocessor` as the processor attribute, `Query` will call the `prepare()` and `finalise()` methods as usual. However, the stream returned by Manatee will not be processed and the `process()` method is not called once. Except for `corpus` and `string` you don't need to set any attributes. Even `container` can be left unset.
 
@@ -133,7 +137,13 @@ A Processor which re-creates dependency information contained in COW corpora and
 ### ConcordanceWriter
 
 
+<<<<<<< HEAD
 ### Nonprocessor(Processor)
+=======
+```python
+Nonprocessor(Processor)
+```
+>>>>>>> 4a648d82a2ff271aeccea9718b8e56c0b6a592a3
 
 A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.hitcount after executing a query if you just need query result counts. See Query() documentation about the implications.
 
