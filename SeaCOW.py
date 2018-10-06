@@ -81,7 +81,7 @@ class Query:
       raise QueryError('You must specify at least one structure to do a search.')
     if self.references is None:
       raise QueryError('You must specify at least one reference to do a search.')
-    if self.container  is None:
+    if self.container  is None and not issubclass(type(self.processor), Nonprocessor):
       raise QueryError('You must specify the container to do a search.')
     if self.string is None or self.string is '':
       raise QueryError('You must set the string property to a search string.')
@@ -95,57 +95,65 @@ class Query:
       self.processor.prepare(self)
 
     # Set up and run query.
-    h_corpus     = manatee.Corpus(self.corpus)
-    h_region     = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
-    h_cont       = h_corpus.get_struct(self.container)
-    h_refs       = [h_corpus.get_attr(r) for r in self.references]
-    start_time   = time.time()
-    results      = h_corpus.eval_query(self.string)
+    h_corpus      = manatee.Corpus(self.corpus)
+
+    if not issubclass(type(self.processor), Nonprocessor):
+      h_region      = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
+      h_cont        = h_corpus.get_struct(self.container)
+      h_refs        = [h_corpus.get_attr(r) for r in self.references]
+
+    start_time    = time.time()
+    results       = h_corpus.eval_query(self.string)
+
+    # Store the hit count as reported.
+    self.hitcount = results.count_rest()
 
     # Process results.
     counter  = 0
     dup_no   = 0
 
-    while not results.end() and (self.max_hits < 0 or counter < self.max_hits):
+    # In case class is "Noprocessor", we do not process the stream.
+    if not issubclass(type(self.processor), Nonprocessor):
+      while not results.end() and (self.max_hits < 0 or counter < self.max_hits):
 
-      # Skip randomly if random subset desired.
-      if self.random_subset > 0 and random.random() > self.random_subset:
-        results.next()
-        continue
-
-      kwic_beg = results.peek_beg()                                  # Match begin.
-      kwic_end = results.peek_end()                                  # Match end.
-      cont_beg_num = h_cont.num_at_pos(kwic_beg)-self.context_left   # Container at match begin.
-      cont_end_num = h_cont.num_at_pos(kwic_beg)+self.context_right  # Container at match end.
-
-      # If hit not in desired region, drop.
-      if cont_beg_num < 0 or cont_end_num < 0:
-        results.next()
-        continue
-
-      cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
-      cont_end_pos = h_cont.end(cont_end_num)                   # Pos at container end.
-
-      refs = [h_refs[i].pos2str(kwic_beg) for i in range(0, len(h_refs))]
-      region = h_region.region(cont_beg_pos, cont_end_pos, '\t', '\t')
-
-      # Deduping.
-      if type(self.bloom) is pybloom_live.ScalableBloomFilter:
-        dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
-        if {dd_region : 0} in self.bloom:
-          dup_no += 1
+        # Skip randomly if random subset desired.
+        if self.random_subset > 0 and random.random() > self.random_subset:
           results.next()
           continue
-        else:
-          self.bloom.add({dd_region : 0})
 
-      # Call the processor.
-      if self.processor:
-        self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
+        kwic_beg = results.peek_beg()                                  # Match begin.
+        kwic_end = results.peek_end()                                  # Match end.
+        cont_beg_num = h_cont.num_at_pos(kwic_beg)-self.context_left   # Container at match begin.
+        cont_end_num = h_cont.num_at_pos(kwic_beg)+self.context_right  # Container at match end.
 
-      # Advance stream/loop.
-      results.next()
-      counter = counter + 1
+        # If hit not in desired region, drop.
+        if cont_beg_num < 0 or cont_end_num < 0:
+          results.next()
+          continue
+
+        cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
+        cont_end_pos = h_cont.end(cont_end_num)                   # Pos at container end.
+
+        refs = [h_refs[i].pos2str(kwic_beg) for i in range(0, len(h_refs))]
+        region = h_region.region(cont_beg_pos, cont_end_pos, '\t', '\t')
+
+        # Deduping.
+        if type(self.bloom) is pybloom_live.ScalableBloomFilter:
+          dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
+          if {dd_region : 0} in self.bloom:
+            dup_no += 1
+            results.next()
+            continue
+          else:
+            self.bloom.add({dd_region : 0})
+
+        # Call the processor.
+        if self.processor:
+          self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
+
+        # Advance stream/loop.
+        results.next()
+        counter = counter + 1
 
     self.querytime     = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     self.hits          = counter
@@ -174,6 +182,24 @@ class Processor(object):
 
   def process(self, query, region, meta, match_offset, match_length):
     print "You are calling a Processor with an unimplemented process() method: " + str(type(self))
+
+
+
+
+class Nonprocessor(Processor):
+  """SeaCOW processor class which does not process the stream"""
+
+  def __init__(self):
+    pass
+
+  def prepare(self, query):
+    pass
+
+  def finalise(self, query):
+    pass
+
+  def process(self, query, region, meta, match_offset, match_length):
+    pass
 
 
 
