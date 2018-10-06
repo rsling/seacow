@@ -18,7 +18,7 @@ q.set_deduplication(off = True)
 
 # Create a Processor object and attach it to the Query object.
 # The Nonprocessor processor does nothing. You can work with the results
-# yourself in the finalise method or just get the hitcount value from the
+# yourself in the finalise method or just get the hits value from the
 # query object. It is the concordance as seported by Manatee.
 p                 = Nonprocessor()  # Create a processor object of apporpriate type.
 q.processor       = p               # Attach the processor to the query.
@@ -26,5 +26,4 @@ q.run()                             # Run the query.
 
 print('Query was: %s' % (q.string))
 print('Corpus used: %s' % (q.corpus))
-print('Query returned %d hits.' % (q.hitcount))
-
+print('Query returned %d hits.' % (q.hits))

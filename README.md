@@ -51,7 +51,7 @@ Performs queries and pipes the data into a processor.
 
 If you pass an instance of `Nonprocessor` as the processor attribute, `Query` will call the `prepare()` and `finalise()` methods as usual. However, the stream returned by Manatee will not be processed and the `process()` method is not called once. Except for `corpus` and `string` you don't need to set any attributes. Even `container` can be left unset.
 
-Using a `Nonprocessor` is intended for those who only want to read the `hitcount` attribute after Manatee has executed the query (like Manatee's own `corpquery -n`).
+Using a `Nonprocessor` is intended for those who only want to read the `count` attribute after Manatee has executed the query (like Manatee's own `corpquery -n`).
 
 
 #### Attributes
@@ -67,7 +67,7 @@ Using a `Nonprocessor` is intended for those who only want to read the `hitcount
 * ```context_left``` The number of `container` structures to be exported to the left of the matching one.
 * ```context_right``` The number of `container` structures to be exported to the right of the matching one.
 * ```processor``` The processor object which takes care of the returned results.
-* ```hitcount``` Contains the concordance size as reported by Manatee. Only available after run() has been called. This is always without deduplication.
+
 
 #### Methods
 
@@ -134,5 +134,5 @@ A Processor which re-creates dependency information contained in COW corpora and
 
 ### Nonprocessor(Processor)
 
-A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.hitcount after executing a query if you just need query result counts. See Query() documentation about the implications.
+A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.count after executing a query if you just need query result counts. See Query() documentation about the implications.
 

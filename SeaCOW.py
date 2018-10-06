@@ -105,15 +105,16 @@ class Query:
     start_time    = time.time()
     results       = h_corpus.eval_query(self.string)
 
-    # Store the hit count as reported.
-    self.hitcount = results.count_rest()
-
     # Process results.
     counter  = 0
     dup_no   = 0
 
     # In case class is "Noprocessor", we do not process the stream.
-    if not issubclass(type(self.processor), Nonprocessor):
+    if issubclass(type(self.processor), Nonprocessor):
+
+      # Store the hit count as reported.
+      self.hits = results.count_rest()
+    else:
       while not results.end() and (self.max_hits < 0 or counter < self.max_hits):
 
         # Skip randomly if random subset desired.
@@ -155,8 +156,10 @@ class Query:
         results.next()
         counter = counter + 1
 
+      # After loop but inside "if not Nonprocessor", set hit count.
+      self.hits          = counter
+
     self.querytime     = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    self.hits          = counter
     self.duplicates    = dup_no
     self.elapsed       = time.time()-start_time
 
