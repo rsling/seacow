@@ -188,7 +188,6 @@ class Processor(object):
 
 
 
-
 class Nonprocessor(Processor):
   """SeaCOW processor class which does not process the stream"""
 
@@ -204,6 +203,53 @@ class Nonprocessor(Processor):
   def process(self, query, region, meta, match_offset, match_length):
     pass
 
+
+
+class ConcordanceLoader(Processor):
+  """SeaCOW processor class for loading a concordance into a Python object"""
+
+  def __init__(self):
+    self.filename = None
+    self.full_structure = False
+
+  def prepare(self, query):
+    self.has_attributes = True if len(query.attributes) > 1 else False
+    self.rex            = re.compile('^<.+>$')
+    self.concordance    = list()
+
+  def finalise(self, query):
+
+    # Nothing to do.
+    pass
+
+
+  def process(self, query, region, meta, match_offset, match_length):
+
+    # Turn Mantee stuff into usable structure.
+    line         = cow_region_to_conc(region, self.has_attributes)
+
+    # Find true tokens via indices (not structs) for separating match from context.
+    indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
+    match_start  = indices[match_offset]
+    match_end    = indices[match_offset + match_length - 1]
+    match_length = match_end - match_start + 1
+
+    # Build concordance line and add to output list.
+    if self.full_structure:
+      concline = {
+        "meta"  : dict(zip(query.references, meta)),
+        "left"  : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[:match_start]],
+        "match" : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_start:match_end+1]],
+        "right" : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_end+1:]]
+        }
+    else:
+      concline = {
+        "meta"  : dict(zip(query.references, meta)),
+        "left"  : ['|'.join(token) for token in line[:match_start]],
+        "match" : ['|'.join(token) for token in line[match_start:match_end+1]],
+        "right" : ['|'.join(token) for token in line[match_end+1:]]
+        }
+    self.concordance.append(concline)
 
 
 

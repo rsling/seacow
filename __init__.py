@@ -8,4 +8,4 @@ __author_email__ = "roland.schaefer@fu-berlin.de"
 __description__ = """Making queries in COW using Manatee."""
 __url__ = "https://github.com/rsling/seacow"
 
-from SeaCOW import Query, Nonprocessor, ConcordanceWriter, DependencyBuilder, Processor, cow_region_to_conc
+from SeaCOW import Query, Nonprocessor, ConcordanceLoader, ConcordanceWriter, DependencyBuilder, Processor, cow_region_to_conc
