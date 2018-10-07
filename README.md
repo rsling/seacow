@@ -18,7 +18,7 @@ Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 
 ## Use
 
-Also see samples folder for some sample code.
+For each Processor class, there is a straightforward and annotated demo in the samnples folder!
 
 1. Create a `SeaCOW.Query` object.
 2. Set the relevant attributes, including search string (see below).
@@ -96,6 +96,24 @@ The 'abstract' class from which processors should be derived.
 
 
 
+### ConcordanceLoader
+
+
+```python
+ConcordanceLoader(Processor)
+```
+
+A Processor which loads a concordance in a Pytho list. Each element represents one hit and is organised as a dictionary. The keys are `meta` (meta data as requested in setting up Query) , `left` (left context), `match` (matching region), `right`  (right context). The three lastmentioned members are lists of strings and dictionaries. Structural markers like <s> are always a encoded as strings. Tokens are either a string (attributes concatenated) or a dictionaries. See `full_structure`.
+
+
+
+#### Attributes
+
+* `full_structure` If `True`, then each token in the matching region and the context will also be a dictionary with annotation names as keys and corresponding values (token, lemma, POS tag, etc.). Else everything will be flattened into one string with the pipes symbol |. Default is `False`.
+
+
+
+
 ### ConcordanceWriter
 
 
@@ -132,7 +150,11 @@ A Processor which re-creates dependency information contained in COW corpora and
 * `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. **NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.**
 
 
-### Nonprocessor(Processor)
+### Nonprocessor
+
+```python
+Nonprocessor(Processor)
+```
 
 A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.count after executing a query if you just need query result counts. See Query() documentation about the implications.
 
