@@ -22,6 +22,7 @@ q.run()
 
 # Now you have a nice structured Python object in p.concordance.
 
-# You don't need json. It's just a convenient way to display the result sturctures for this demo.
-print json.dumps(p.concordance[0:2], sort_keys=False, indent=2)
+# You don't need JSON. The json library just provides a convenient way
+# of displaying the resulting structures.
+print json.dumps(p.concordance[0:2], sort_keys = False, indent = 2)
 

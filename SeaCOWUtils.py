@@ -2,6 +2,12 @@
 
 import itertools
 
+def cow_rough_region_to_conc(region):
+  result = list(region)
+  del result[1::2]
+  return [r.strip() for r in result]
+
+
 def isplit(iterable, splitters):
   return [list(g) for k,g in itertools.groupby(iterable, lambda x: x in splitters)]
 

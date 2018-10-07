@@ -10,7 +10,7 @@ from time import gmtime, strftime
 import pybloom_live
 from anytree import Node, RenderTree
 from anytree.exporter import DotExporter, JsonExporter
-from SeaCOWUtils import isplit, flatten, cow_region_to_conc
+from SeaCOWUtils import isplit, flatten, cow_region_to_conc, cow_rough_region_to_conc
 
 
 
@@ -309,6 +309,58 @@ class ConcordanceWriter(Processor):
     self.handle.write((' '.join(['|'.join(token) for token in line[:match_start]]) + '\t').encode('utf-8'))
     self.handle.write((' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t').encode('utf-8'))
     self.handle.write((' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n').encode('utf-8'))
+
+
+
+class ConcordanceDumper(Processor):
+  """SeaCOW processor class for concordance dumping (corpquery-style)"""
+
+  def __init__(self):
+    self.filename = None
+
+  def prepare(self, query):
+    self.handle         = open(self.filename, 'w') if self.filename else sys.stdout
+    self.has_attributes = True if len(query.attributes) > 1 else False
+    self.rex            = re.compile('^<.+>$')
+
+    self.handle.write('# = BASIC =============================================================\n')
+    self.handle.write('# QUERY:         %s\n' % query.string)
+    self.handle.write('# CORPUS:        %s\n' % query.corpus)
+    self.handle.write('# = CONFIG ============================================================\n')
+    self.handle.write('# MAX_HITS:      %s\n' % query.max_hits)
+    self.handle.write('# RANDOM_SUBSET: %s\n' % query.random_subset)
+    self.handle.write('# ATTRIBUTES:    %s\n' % ','.join(query.attributes))
+    self.handle.write('# STRUCTURES:    %s\n' % ','.join(query.structures))
+    self.handle.write('# REFERENCES:    %s\n' % ','.join(query.references))
+    self.handle.write('# CONTAINER:     %s\n' % query.container)
+    self.handle.write('# CNT_LEFT:      %s\n' % query.context_left)
+    self.handle.write('# CNT_RIGHT:     %s\n' % query.context_right)
+    self.handle.write('# DEDUPING:      %s\n' % str(query.bloom is not None))
+    self.handle.write('# = CONCORDANCE TSV ===================================================\n')
+    self.handle.write('\t'.join(query.references + ['left.context', 'match', 'right.context']) + '\n')
+
+  def finalise(self, query):
+    self.handle.write('# = STATS =============================================================\n')
+    self.handle.write('# HITS:          %s\n' % query.hits)
+    self.handle.write('# DUPLICATES:    %s\n' % query.duplicates)
+    self.handle.write('# QUERY TIME:    %s\n' % query.querytime)
+    self.handle.write('# ELAPSED:       %s s\n' % str(query.elapsed))
+    self.handle.write('# =====================================================================\n')
+
+    # Close file handle if writing to file.
+    if self.handle is not sys.stdout:
+      self.handle.close()
+
+  def process(self, query, region, meta, match_offset, match_length):
+
+    # Turn Mantee stuff into unstructured list.
+    line         = cow_rough_region_to_conc(region)
+
+    # Write meta and all the stuff.
+    self.handle.write('\t'.join(meta + [str(match_offset), str(match_length)]) + '\t' + ' '.join(line) + '\n')
+
+
+
 
 
 
