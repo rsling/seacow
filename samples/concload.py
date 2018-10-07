@@ -19,5 +19,5 @@ q.processor       = p
 q.run()
 
 # You don't need json. It's just a convenient way to display the result sturcture in this demo.
-print json.dumps(p.concordance[0:2], sort_keys=False, indent=4)
+print json.dumps(p.concordance[0:2], sort_keys=False, indent=2)
 
