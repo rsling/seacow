@@ -238,9 +238,9 @@ class ConcordanceLoader(Processor):
     if self.full_structure:
       concline = {
         "meta"  : dict(zip(query.references, meta)),
-        "left"  : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[:match_start]],
-        "match" : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_start:match_end+1]],
-        "right" : [token if isinstance(token, basestring) and re.match('<', token, re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_end+1:]]
+        "left"  : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[:match_start]],
+        "match" : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_start:match_end+1]],
+        "right" : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_end+1:]]
         }
     else:
       concline = {
