@@ -2,6 +2,8 @@
 
 ![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/sample.png)
 
+## Note: Because of the additional processing of query results in SeaCOW, it is significantly slower that NoSketchEngine or corpquery. This cannot be avoided unless you drop the extra processing, which is the whole point of having SeaCOW in the first place. Please do not file bug reports or complaints about the speed penalty involved in using SeaCOW. It is designed primarily for running unattended queries on a server with built-in processing, filtering, etc. If you are a Python wizard, you are invited to help us make the additional processing more efficient, of course.
+
 ## Features
 
 - SeaCOW is a class-based rewrite of the old ManaCOW project.
