@@ -1,6 +1,6 @@
 # SeaCOW, the COW wrapper for the Manatee library
 
-![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/sample.png)
+![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/samples/sample.png)
 
 ## Note: Because of the additional processing of query results in SeaCOW, it is significantly slower that NoSketchEngine or corpquery. This cannot be avoided unless you drop the extra processing, which is the whole point of having SeaCOW in the first place. Please do not file bug reports or complaints about the speed penalty involved in using SeaCOW. It is designed primarily for running unattended queries on a server with built-in processing, filtering, etc. If you are a Python wizard, you are invited to help us make the additional processing more efficient, of course.
 
@@ -19,6 +19,8 @@ We currently do not support or recommend installing it. In any case, you need a 
 Get an account on https://www.webcorpora.org/ to use SeaCOW with COW.
 
 ## Use
+
+For each Processor class, there is a straightforward and annotated demo in the samnples folder!
 
 1. Create a `SeaCOW.Query` object.
 2. Set the relevant attributes, including search string (see below).
@@ -44,8 +46,15 @@ Formats a Manatee region (as returned within Query objects and passed to Process
 Query(object)
 ```
 
-
 Performs queries and pipes the data into a processor.
+
+
+#### Notes on using `Nonprocessor` instances with `Query`!
+
+If you pass an instance of `Nonprocessor` as the processor attribute, `Query` will call the `prepare()` and `finalise()` methods as usual. However, the stream returned by Manatee will not be processed and the `process()` method is not called once. Except for `corpus` and `string` you don't need to set any attributes. Even `container` can be left unset.
+
+Using a `Nonprocessor` is intended for those who only want to read the `count` attribute after Manatee has executed the query (like Manatee's own `corpquery -n`).
+
 
 #### Attributes
 
@@ -60,6 +69,7 @@ Performs queries and pipes the data into a processor.
 * ```context_left``` The number of `container` structures to be exported to the left of the matching one.
 * ```context_right``` The number of `container` structures to be exported to the right of the matching one.
 * ```processor``` The processor object which takes care of the returned results.
+
 
 #### Methods
 
@@ -85,6 +95,24 @@ The 'abstract' class from which processors should be derived.
 * `prepare(self, query)` Code executed before the query results are processed.
 * `finalise(self, query)` Code executed after the query results are processed.
 * `process(self, query, region, meta, match_offset, match_length)` This is the callback called for each hit returned for the query. `query` is the query object. `region` is the Manatee region which should always be processed with `cow_region_to_conc`. `meta` is a list of all meta information for the hit (reference attributes; look in `query.references` for what they are). `match_offset` and `match_length` locate the actual matching structure in `region`.
+
+
+
+### ConcordanceLoader
+
+
+```python
+ConcordanceLoader(Processor)
+```
+
+A Processor which loads a concordance in a Pytho list. Each element represents one hit and is organised as a dictionary. The keys are `meta` (meta data as requested in setting up Query) , `left` (left context), `match` (matching region), `right`  (right context). The three lastmentioned members are lists of strings and dictionaries. Structural markers like <s> are always a encoded as strings. Tokens are either a string (attributes concatenated) or a dictionaries. See `full_structure`.
+
+
+
+#### Attributes
+
+* `full_structure` If `True`, then each token in the matching region and the context will also be a dictionary with annotation names as keys and corresponding values (token, lemma, POS tag, etc.). Else everything will be flattened into one string with the pipes symbol |. Default is `False`.
+
 
 
 
@@ -122,3 +150,13 @@ A Processor which re-creates dependency information contained in COW corpora and
 * `printtrees` Set to `True` to output ASCII renderings of trees at the terminal while processing.
 * `imagemetaid1` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, first part. Recommended: `doc.id`. See `Query.references` for where you put the reference attributes in the list.
 * `imagemetaid2` The 0-based index of the hit's `meta` attribute which will be used to create graphics file names, second part. Recommended: `s.idx`. See `Query.references` for where you put the reference attributes in the list. **NOTE: `imagemetaid2` is not required. However, if you only use a document identifier, subsequent sentences will overwrite those from the document already written.**
+
+
+### Nonprocessor
+
+```python
+Nonprocessor(Processor)
+```
+
+A Processor which does nothing. All four functions simply call `pass`. Use this to read Query.count after executing a query if you just need query result counts. See Query() documentation about the implications.
+

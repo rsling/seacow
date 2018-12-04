@@ -10,7 +10,7 @@ from time import gmtime, strftime
 import pybloom_live
 from anytree import Node, RenderTree
 from anytree.exporter import DotExporter, JsonExporter
-from SeaCOWUtils import isplit, flatten, cow_region_to_conc
+from SeaCOWUtils import isplit, flatten, cow_region_to_conc, cow_rough_region_to_conc
 
 
 
@@ -81,7 +81,7 @@ class Query:
       raise QueryError('You must specify at least one structure to do a search.')
     if self.references is None:
       raise QueryError('You must specify at least one reference to do a search.')
-    if self.container  is None:
+    if self.container  is None and not issubclass(type(self.processor), Nonprocessor):
       raise QueryError('You must specify the container to do a search.')
     if self.string is None or self.string is '':
       raise QueryError('You must set the string property to a search string.')
@@ -95,60 +95,71 @@ class Query:
       self.processor.prepare(self)
 
     # Set up and run query.
-    h_corpus     = manatee.Corpus(self.corpus)
-    h_region     = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
-    h_cont       = h_corpus.get_struct(self.container)
-    h_refs       = [h_corpus.get_attr(r) for r in self.references]
-    start_time   = time.time()
-    results      = h_corpus.eval_query(self.string)
+    h_corpus      = manatee.Corpus(self.corpus)
+
+    if not issubclass(type(self.processor), Nonprocessor):
+      h_region      = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
+      h_cont        = h_corpus.get_struct(self.container)
+      h_refs        = [h_corpus.get_attr(r) for r in self.references]
+
+    start_time    = time.time()
+    results       = h_corpus.eval_query(self.string)
 
     # Process results.
     counter  = 0
     dup_no   = 0
 
-    while not results.end() and (self.max_hits < 0 or counter < self.max_hits):
+    # In case class is "Noprocessor", we do not process the stream.
+    if issubclass(type(self.processor), Nonprocessor):
 
-      # Skip randomly if random subset desired.
-      if self.random_subset > 0 and random.random() > self.random_subset:
-        results.next()
-        continue
+      # Store the hit count as reported.
+      self.hits = results.count_rest()
+    else:
+      while not results.end() and (self.max_hits < 0 or counter < self.max_hits):
 
-      kwic_beg = results.peek_beg()                                  # Match begin.
-      kwic_end = results.peek_end()                                  # Match end.
-      cont_beg_num = h_cont.num_at_pos(kwic_beg)-self.context_left   # Container at match begin.
-      cont_end_num = h_cont.num_at_pos(kwic_beg)+self.context_right  # Container at match end.
-
-      # If hit not in desired region, drop.
-      if cont_beg_num < 0 or cont_end_num < 0:
-        results.next()
-        continue
-
-      cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
-      cont_end_pos = h_cont.end(cont_end_num)                   # Pos at container end.
-
-      refs = [h_refs[i].pos2str(kwic_beg) for i in range(0, len(h_refs))]
-      region = h_region.region(cont_beg_pos, cont_end_pos, '\t', '\t')
-
-      # Deduping.
-      if type(self.bloom) is pybloom_live.ScalableBloomFilter:
-        dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
-        if {dd_region : 0} in self.bloom:
-          dup_no += 1
+        # Skip randomly if random subset desired.
+        if self.random_subset > 0 and random.random() > self.random_subset:
           results.next()
           continue
-        else:
-          self.bloom.add({dd_region : 0})
 
-      # Call the processor.
-      if self.processor:
-        self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
+        kwic_beg = results.peek_beg()                                  # Match begin.
+        kwic_end = results.peek_end()                                  # Match end.
+        cont_beg_num = h_cont.num_at_pos(kwic_beg)-self.context_left   # Container at match begin.
+        cont_end_num = h_cont.num_at_pos(kwic_beg)+self.context_right  # Container at match end.
 
-      # Advance stream/loop.
-      results.next()
-      counter = counter + 1
+        # If hit not in desired region, drop.
+        if cont_beg_num < 0 or cont_end_num < 0:
+          results.next()
+          continue
+
+        cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
+        cont_end_pos = h_cont.end(cont_end_num)                   # Pos at container end.
+
+        refs = [h_refs[i].pos2str(kwic_beg) for i in range(0, len(h_refs))]
+        region = h_region.region(cont_beg_pos, cont_end_pos, '\t', '\t')
+
+        # Deduping.
+        if type(self.bloom) is pybloom_live.ScalableBloomFilter:
+          dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
+          if {dd_region : 0} in self.bloom:
+            dup_no += 1
+            results.next()
+            continue
+          else:
+            self.bloom.add({dd_region : 0})
+
+        # Call the processor.
+        if self.processor:
+          self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
+
+        # Advance stream/loop.
+        results.next()
+        counter = counter + 1
+
+      # After loop but inside "if not Nonprocessor", set hit count.
+      self.hits          = counter
 
     self.querytime     = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    self.hits          = counter
     self.duplicates    = dup_no
     self.elapsed       = time.time()-start_time
 
@@ -175,6 +186,70 @@ class Processor(object):
   def process(self, query, region, meta, match_offset, match_length):
     print "You are calling a Processor with an unimplemented process() method: " + str(type(self))
 
+
+
+class Nonprocessor(Processor):
+  """SeaCOW processor class which does not process the stream"""
+
+  def __init__(self):
+    pass
+
+  def prepare(self, query):
+    pass
+
+  def finalise(self, query):
+    pass
+
+  def process(self, query, region, meta, match_offset, match_length):
+    pass
+
+
+
+class ConcordanceLoader(Processor):
+  """SeaCOW processor class for loading a concordance into a Python object"""
+
+  def __init__(self):
+    self.filename = None
+    self.full_structure = False
+
+  def prepare(self, query):
+    self.has_attributes = True if len(query.attributes) > 1 else False
+    self.rex            = re.compile('^<.+>$')
+    self.concordance    = list()
+
+  def finalise(self, query):
+
+    # Nothing to do.
+    pass
+
+
+  def process(self, query, region, meta, match_offset, match_length):
+
+    # Turn Mantee stuff into usable structure.
+    line         = cow_region_to_conc(region, self.has_attributes)
+
+    # Find true tokens via indices (not structs) for separating match from context.
+    indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
+    match_start  = indices[match_offset]
+    match_end    = indices[match_offset + match_length - 1]
+    match_length = match_end - match_start + 1
+
+    # Build concordance line and add to output list.
+    if self.full_structure:
+      concline = {
+        "meta"  : dict(zip(query.references, meta)),
+        "left"  : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[:match_start]],
+        "match" : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_start:match_end+1]],
+        "right" : [str(token[0]) if re.match(r'<', token[0], re.UNICODE) else dict(zip(query.attributes, token)) for token in line[match_end+1:]]
+        }
+    else:
+      concline = {
+        "meta"  : dict(zip(query.references, meta)),
+        "left"  : ['|'.join(token) for token in line[:match_start]],
+        "match" : ['|'.join(token) for token in line[match_start:match_end+1]],
+        "right" : ['|'.join(token) for token in line[match_end+1:]]
+        }
+    self.concordance.append(concline)
 
 
 
@@ -237,11 +312,66 @@ class ConcordanceWriter(Processor):
 
 
 
+class ConcordanceDumper(Processor):
+  """SeaCOW processor class for concordance dumping (corpquery-style)"""
+
+  def __init__(self):
+    self.filename = None
+
+  def prepare(self, query):
+    self.handle         = open(self.filename, 'w') if self.filename else sys.stdout
+    self.has_attributes = True if len(query.attributes) > 1 else False
+    self.rex            = re.compile('^<.+>$')
+
+    self.handle.write('# = BASIC =============================================================\n')
+    self.handle.write('# QUERY:         %s\n' % query.string)
+    self.handle.write('# CORPUS:        %s\n' % query.corpus)
+    self.handle.write('# = CONFIG ============================================================\n')
+    self.handle.write('# MAX_HITS:      %s\n' % query.max_hits)
+    self.handle.write('# RANDOM_SUBSET: %s\n' % query.random_subset)
+    self.handle.write('# ATTRIBUTES:    %s\n' % ','.join(query.attributes))
+    self.handle.write('# STRUCTURES:    %s\n' % ','.join(query.structures))
+    self.handle.write('# REFERENCES:    %s\n' % ','.join(query.references))
+    self.handle.write('# CONTAINER:     %s\n' % query.container)
+    self.handle.write('# CNT_LEFT:      %s\n' % query.context_left)
+    self.handle.write('# CNT_RIGHT:     %s\n' % query.context_right)
+    self.handle.write('# DEDUPING:      %s\n' % str(query.bloom is not None))
+    self.handle.write('# = CONCORDANCE TSV ===================================================\n')
+    self.handle.write('\t'.join(query.references + ['left.context', 'match', 'right.context']) + '\n')
+
+  def finalise(self, query):
+    self.handle.write('# = STATS =============================================================\n')
+    self.handle.write('# HITS:          %s\n' % query.hits)
+    self.handle.write('# DUPLICATES:    %s\n' % query.duplicates)
+    self.handle.write('# QUERY TIME:    %s\n' % query.querytime)
+    self.handle.write('# ELAPSED:       %s s\n' % str(query.elapsed))
+    self.handle.write('# =====================================================================\n')
+
+    # Close file handle if writing to file.
+    if self.handle is not sys.stdout:
+      self.handle.close()
+
+  def process(self, query, region, meta, match_offset, match_length):
+
+    # Turn Mantee stuff into unstructured list.
+    line         = cow_rough_region_to_conc(region)
+
+    # Write meta and all the stuff.
+    self.handle.write('\t'.join(meta + [str(match_offset), str(match_length)]) + '\t' + ' '.join(line) + '\n')
+
+
+
+
+
+
 def edgeattrfunc(node, child):
   return 'label="%s"' % (child.relation)
 
 def nodenamefunc(node):
-  return '%s(%s)' % (node.token, node.linear)
+  return '%s(%s)' % (make_token_safe(node.token), node.linear)
+
+def make_token_safe(token):
+  return(token.replace('"', 'DQUOTES').replace("'", 'SQUOTES'))
 
 class DependencyBuilder(Processor):
   """SeaCOW processor class for concordance writing"""
@@ -281,7 +411,7 @@ class DependencyBuilder(Processor):
 
 
   def filtre(self, tree, line):
-    return False
+    return True
 
   def process(self, query, region, meta, match_offset, match_length):
 
@@ -292,12 +422,12 @@ class DependencyBuilder(Processor):
     # Turn everything into nodes already - to be linked into tree in next step.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
     nodes        = [Node("0", token = "TOP", relation = "", head = "", linear = 0, meta = dict(zip(query.references, meta))),] + \
-                     [Node(line[x][self.column_index],
+                     [Node(make_token_safe(line[x][self.column_index]),
                      token    = line[x][self.column_token],
-                     attribs  = dict(zip([query.attributes[a] for a in self.attribs], [line[x][a] for a in self.attribs])),
                      relation = line[x][self.column_relation],
                      head     = line[x][self.column_head],
-                     linear   = int(line[x][self.column_index])) for x in indices]
+                     linear   = int(line[x][self.column_index]),
+                     **dict(zip([query.attributes[a] for a in self.attribs], [line[x][a] for a in self.attribs])) ) for x in indices]
 
     # Build tree from top.
     for n in nodes[1:]:
@@ -305,7 +435,7 @@ class DependencyBuilder(Processor):
 
     # If a descendant implements the filter, certain structures can be
     # discarded.
-    if self.filtre(nodes[0], line):
+    if not self.filtre(nodes, line):
       return
 
     # Export as desired. Three independent formats.
