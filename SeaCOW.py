@@ -43,6 +43,7 @@ class Query:
 
   def __init__(self):
     self.corpus        = None
+    self.subcorpus     = None
     self.attributes    = None
     self.structures    = None
     self.references    = None
@@ -96,6 +97,14 @@ class Query:
 
     # Set up and run query.
     h_corpus      = manatee.Corpus(self.corpus)
+    if self.subcorpus is not None:
+        # if subcorpus name is given (instead of path), figure out full path to subcorpus .subc file:
+        if not "/" in self.subcorpus:
+            self.subcorpus = h_corpus.get_conf("PATH") + "subcorp/" + re.sub("\.subc$", "", self.subcorpus.strip(" /")) + ".subc"
+        if os.path.exists(self.subcorpus):
+            h_corpus = manatee.SubCorpus (h_corpus, self.subcorpus)
+        else:
+            self.subcorpus = None
 
     if not issubclass(type(self.processor), Nonprocessor):
       h_region      = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
@@ -268,6 +277,7 @@ class ConcordanceWriter(Processor):
     self.handle.write('# = BASIC =============================================================\n')
     self.handle.write('# QUERY:         %s\n' % query.string)
     self.handle.write('# CORPUS:        %s\n' % query.corpus)
+    self.handle.write('# SUBCORPUS:     %s\n' % query.subcorpus)
     self.handle.write('# = CONFIG ============================================================\n')
     self.handle.write('# MAX_HITS:      %s\n' % query.max_hits)
     self.handle.write('# RANDOM_SUBSET: %s\n' % query.random_subset)
