@@ -59,7 +59,7 @@ Using a `Nonprocessor` is intended for those who only want to read the `count` a
 #### Attributes
 
 * ```corpus``` The string which identifies the corpus (lower case), such as `'decow16a-nano'`.
-* ```subcorpus``` A string which identifies the full path to a subcorpus file (ending with .subc), or just a subcorpus name (such as `'Forum'`)
+* ```subcorpus``` A string which identifies the full path to a subcorpus file (ending with `'.subc'`), or just a subcorpus name (such as `'Forum'`)
 * ```attributes``` A list of attributes of tokens to be exported, such as `['word', 'tag', 'lemma', 'depind', 'dephd', 'deprel']`.
 * ```structures``` A list of structures to be exported, such as `['s', 'nx']`.
 * ```references``` A list of reference attributes to be exported, such as `['doc.id', 'doc.url', 's.idx']`.
