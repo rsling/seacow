@@ -98,13 +98,13 @@ class Query:
     # Set up and run query.
     h_corpus      = manatee.Corpus(self.corpus)
     if self.subcorpus is not None:
-        # if subcorpus name is given (instead of path), figure out full path to subcorpus .subc file:
+        # If subcorpus name is given (instead of path), figure out full path to subcorpus .subc file.
         if not "/" in self.subcorpus:
             self.subcorpus = h_corpus.get_conf("PATH") + "subcorp/" + re.sub("\.subc$", "", self.subcorpus.strip(" /")) + ".subc"
         if os.path.exists(self.subcorpus):
             h_corpus = manatee.SubCorpus (h_corpus, self.subcorpus)
         else:
-            self.subcorpus = None
+            raise QueryError('The requested subcorpus cannot be found.')
 
     if not issubclass(type(self.processor), Nonprocessor):
       h_region      = manatee.CorpRegion(h_corpus, ','.join(self.attributes), ','.join(self.structures))
