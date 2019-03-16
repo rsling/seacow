@@ -36,7 +36,7 @@ For each Processor class, there is a straightforward and annotated demo in the s
 cow_region_to_conc(region, attrs = True)
 ```
 
-Formats a Manatee region (as returned within Query objects and passed to Processor objects) to a usable structure. Decodes UTF-8. Set `attrs` to `True` if your concordance contains no structures and only one positional attribute (pure token stream).
+Formats a Manatee region (as returned within Query objects and passed to Processor objects) to a usable structure. Decodes UTF-8. Set `attrs` to `False` if your concordance contains no structures and only one positional attribute (pure token stream).
 
 ## Classes
 
