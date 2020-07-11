@@ -7,9 +7,9 @@
 from SeaCOW import Query, ConcordanceDumper
 
 q = Query()
-q.corpus          = 'decow16a-nano'
-q.string          = '[word="Chuzpe"]'
-q.max_hits        = 10
+q.corpus          = 'encow16a-nano'
+q.string          = '[tag="N."][word="attention"]'
+q.max_hits        = -1
 q.attributes      = ['word']
 q.structures      = ['s']
 q.references      = ['doc.url', 'doc.id', 's.idx']
@@ -17,6 +17,6 @@ q.container       = 's'
 q.set_deduplication()
 
 p                 = ConcordanceDumper()
-p.filename        = 'chuzpe.csv'
+p.filename        = 'dump.txt'
 q.processor       = p
 q.run()

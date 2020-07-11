@@ -22,6 +22,7 @@ q.set_deduplication()
 # as comments at the top and bottom of the table.
 p                 = ConcordanceWriter() # Create a processor object of apporpriate type.
 p.filename        = 'hausfrau.csv'      # File name for output data. Directories MUST EXIST!
+p.filename        = None                # None for dump to terminal.
 q.processor       = p                   # Attach the processor to the query.
 q.run()                                 # Run the query.
 

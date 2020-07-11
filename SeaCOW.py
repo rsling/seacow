@@ -91,6 +91,18 @@ class Query:
     if self.processor and not issubclass(type(self.processor), Processor):
       raise QueryError('The processor class must inherit from SeaCOW.Processor.')
 
+    # Emit heuristic warning that container might end up being to small.
+    # This warns about the behviour reported 2020 by EP.
+    q_pattern = r'within *<' + self.container + r'/>'
+    q_string = r'within <' + self.container + r'/>'
+    if not re.match(q_pattern, self.string):
+      print("WARNING! Your query should probably end in '" + q_string + "' or your match might exceed the exported container.")
+      if self.context_left == 0 or self.context_right == 0:
+        print(" ... especially because at least one of your contexts is 0!")
+      print(" ... Watch out for 'Index anomaly' warnings.")
+      print
+
+
     # Allow the processor to engage in preparatory action/check whether everything is fine.
     if self.processor:
       self.processor.prepare(self)
@@ -240,6 +252,16 @@ class ConcordanceLoader(Processor):
     # Find true tokens via indices (not structs) for separating match from context.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
     match_start  = indices[match_offset]
+
+    # If someone does not search within <x/> but exports just x,
+    # part of the match might be cut off. This skips the concordance line
+    # in those situations. Prevents crashes reported 2020 by EP.
+    if match_offset >= len(indices) or match_offset + match_length - 1 >= len(indices):
+      print("Index anomaly! You just lost a concordance line.")
+      print("Are you querying matches that might exceed the exported container?")
+      print
+      return
+
     match_end    = indices[match_offset + match_length - 1]
     match_length = match_end - match_start + 1
 
