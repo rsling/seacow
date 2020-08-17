@@ -93,7 +93,7 @@ class Query:
 
     # Emit heuristic warning that container might end up being to small.
     # This warns about the behviour reported 2020 by EP.
-    q_pattern = r'within *<' + self.container + r'/>'
+    q_pattern = r'.* within *<' + self.container + r'/>.*'
     q_string = r'within <' + self.container + r'/>'
     if not re.match(q_pattern, self.string):
       print("WARNING! Your query should probably end in '" + q_string + "' or your match might exceed the exported container.")
@@ -329,6 +329,8 @@ class ConcordanceWriter(Processor):
 
     # Turn Mantee stuff into usable structure.
     line         = cow_region_to_conc(region, self.has_attributes)
+    for i in line:
+        print(i)
 
     # Find true tokens via indices (not structs) for separating match from context.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
