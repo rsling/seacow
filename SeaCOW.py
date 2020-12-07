@@ -199,13 +199,13 @@ class Processor(object):
     raise Exception('You cannot use the Processor class directly. Please implement a descendant!')
 
   def prepare(self, query):
-    print "You are calling a Processor with an unimplemented prepare() method: " + str(type(self))
+    print ( "You are calling a Processor with an unimplemented prepare() method: " + str(type(self)) )
 
   def finalise(self, query):
-    print "You are calling a Processor with an unimplemented finalise() method: " + str(type(self))
+    print ( "You are calling a Processor with an unimplemented finalise() method: " + str(type(self)) )
 
   def process(self, query, region, meta, match_offset, match_length):
-    print "You are calling a Processor with an unimplemented process() method: " + str(type(self))
+    print ( "You are calling a Processor with an unimplemented process() method: " + str(type(self)) )
 
 
 
