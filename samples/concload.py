@@ -6,7 +6,7 @@ import json # Just for pretty-printing.
 # See sample.py for annotations of these attributes.
 q = Query()
 q.corpus          = 'decow16a-nano'
-q.string          = '[word="Hausfrau"]'
+q.string          = '[word="Gartenzwerg"]'
 q.max_hits        = 10
 q.attributes      = ['word', 'tag']
 q.structures      = ['s']
@@ -22,7 +22,7 @@ q.run()
 
 # Now you have a nice structured Python object in p.concordance.
 
-# You don't need JSON. The json library just provides a convenient way
-# of displaying the resulting structures.
+# The json library just provides a convenient way of displaying the
+# resulting structures.
 print json.dumps(p.concordance[0:2], sort_keys = False, indent = 2)
 

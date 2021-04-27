@@ -5,7 +5,7 @@ from SeaCOW import Query, Nonprocessor
 # Create a Query object and set whatever needs to be set.
 q = Query()
 q.corpus          = 'decow16a-nano'         # Lower-case name of the corpusto use.
-q.string          = '[word="Chuzpe"]'       # A normal CQL string as used in NoSketchEngine.
+q.string          = '[word="Gartenzwerg"]'  # A normal CQL string as used in NoSketchEngine.
 q.max_hits        = -1                      # Maximal number of hits to return. Ignored for Nonprocessor.
 q.attributes      = []                      # For counting, you don't need word attributes.
 q.structures      = []                      # ... you don't need structural attributes.
