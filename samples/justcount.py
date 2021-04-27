@@ -10,8 +10,7 @@ q.max_hits        = -1                      # Maximal number of hits to return. 
 q.attributes      = []                      # For counting, you don't need word attributes.
 q.structures      = []                      # ... you don't need structural attributes.
 q.references      = []                      # ... you don't need reference attrs.
-q.container       = None                    # Which container strutcure should be used? None is OK
-                                            # only if class is Nonprocessor.
+q.container       = 's'                     # Which container strutcure should be used?
 
 # Using the deduplicator would NOT change the outcome. Switch off.
 q.set_deduplication(off = True)
