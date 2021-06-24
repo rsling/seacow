@@ -93,7 +93,7 @@ class Query:
 
     # Emit heuristic warning that container might end up being to small.
     # This warns about the behviour reported 2020 by EP.
-    q_pattern = r'.* within *<' + self.container + r'/>.*'
+    q_pattern = r'.* within *<' + self.container + r'(| [^>]+)/>.*'
     q_string = r'within <' + self.container + r'/>'
     if not re.match(q_pattern, self.string):
       print("WARNING! Your query should probably end in '" + q_string + "' or your match might exceed the exported container.")
