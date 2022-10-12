@@ -329,8 +329,6 @@ class ConcordanceWriter(Processor):
 
     # Turn Mantee stuff into usable structure.
     line         = cow_region_to_conc(region, self.has_attributes)
-    for i in line:
-        print(i)
 
     # Find true tokens via indices (not structs) for separating match from context.
     indices      = [i for i, s in enumerate(line) if not self.rex.match(s[0])]
