@@ -106,7 +106,7 @@ The 'abstract' class from which processors should be derived.
 ConcordanceLoader(Processor)
 ```
 
-A Processor which loads a concordance in a Pytho list. Each element represents one hit and is organised as a dictionary. The keys are `meta` (meta data as requested in setting up Query) , `left` (left context), `match` (matching region), `right`  (right context). The three lastmentioned members are lists of strings and dictionaries. Structural markers like \<s\> are always a encoded as strings. Tokens are either a string (attributes concatenated) or a dictionaries. See `full_structure`.
+A Processor which loads a concordance in a Python list. Each element represents one hit and is organised as a dictionary. The keys are `meta` (meta data as requested in setting up Query) , `left` (left context), `match` (matching region), `right`  (right context). The three lastmentioned members are lists of strings and dictionaries. Structural markers like \<s\> are always a encoded as strings. Tokens are either a string (attributes concatenated) or a dictionaries. See `full_structure`.
 
 
 
