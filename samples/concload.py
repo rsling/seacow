@@ -24,5 +24,5 @@ q.run()
 
 # The json library just provides a convenient way of displaying the
 # resulting structures.
-print json.dumps(p.concordance[0:2], sort_keys = False, indent = 2)
+print(json.dumps(p.concordance[0:2], sort_keys = False, indent = 2))
 

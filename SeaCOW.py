@@ -84,7 +84,7 @@ class Query:
       raise QueryError('You must specify at least one reference to do a search.')
     if self.container  is None and not issubclass(type(self.processor), Nonprocessor):
       raise QueryError('You must specify the container to do a search.')
-    if self.string is None or self.string is '':
+    if self.string is None or self.string == '':
       raise QueryError('You must set the string property to a search string.')
 
     # Check whether processor of proper type
@@ -100,7 +100,7 @@ class Query:
       if self.context_left == 0 or self.context_right == 0:
         print(" ... especially because at least one of your contexts is 0!")
       print(" ... Watch out for 'Index anomaly' warnings.")
-      print
+      print()
 
 
     # Allow the processor to engage in preparatory action/check whether everything is fine.
@@ -140,7 +140,7 @@ class Query:
 
         # Skip randomly if random subset desired.
         if self.random_subset > 0 and random.random() > self.random_subset:
-          results.next()
+          next(results)
           continue
 
         kwic_beg = results.peek_beg()                                  # Match begin.
@@ -150,7 +150,7 @@ class Query:
 
         # If hit not in desired region, drop.
         if cont_beg_num < 0 or cont_end_num < 0:
-          results.next()
+          next(results)
           continue
 
         cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
@@ -162,19 +162,19 @@ class Query:
         # Deduping.
         if type(self.bloom) is pybloom_live.ScalableBloomFilter:
           dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
-          if {dd_region : 0} in self.bloom:
+          if dd_region in self.bloom:
             dup_no += 1
-            results.next()
+            next(results)
             continue
           else:
-            self.bloom.add({dd_region : 0})
+            self.bloom.add(dd_region)
 
         # Call the processor.
         if self.processor:
           self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
 
         # Advance stream/loop.
-        results.next()
+        next(results)
         counter = counter + 1
 
       # After loop but inside "if not Nonprocessor", set hit count.
@@ -259,7 +259,7 @@ class ConcordanceLoader(Processor):
     if match_offset >= len(indices) or match_offset + match_length - 1 >= len(indices):
       print("Index anomaly! You just lost a concordance line.")
       print("Are you querying matches that might exceed the exported container?")
-      print
+      print()
       return
 
     match_end    = indices[match_offset + match_length - 1]
@@ -338,9 +338,9 @@ class ConcordanceWriter(Processor):
 
     # Write meta, left, match, right.
     self.handle.write('\t'.join(meta) + '\t')
-    self.handle.write((' '.join(['|'.join(token) for token in line[:match_start]]) + '\t').encode('utf-8'))
-    self.handle.write((' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t').encode('utf-8'))
-    self.handle.write((' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n').encode('utf-8'))
+    self.handle.write(' '.join(['|'.join(token) for token in line[:match_start]]) + '\t')
+    self.handle.write(' '.join(['|'.join(token) for token in line[match_start:match_end+1]]) + '\t')
+    self.handle.write(' '.join(['|'.join(token) for token in line[match_end+1:]]) + '\n')
 
 
 
@@ -482,9 +482,9 @@ class DependencyBuilder(Processor):
       fnam = self.fileprefix + '_' + meta[self.imagemetaid1]
       if self.imagemetaid2:
         fnam = fnam + '_' + meta[self.imagemetaid2]
-      if self.saveimage is 'dot':
+      if self.saveimage == 'dot':
         DotExporter(nodes[0]).to_dotfile(fnam + '.dot')
-      elif self.saveimage is 'png':
+      elif self.saveimage == 'png':
         DotExporter(nodes[0], edgeattrfunc = edgeattrfunc, nodenamefunc = nodenamefunc).to_picture(fnam + '.png')
 
 

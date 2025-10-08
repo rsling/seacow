@@ -19,17 +19,17 @@ class FiltredDependencyBuilder(DependencyBuilder):
       return False
 
     # Find the 'give' nodes.
-    gives = findall_by_attr(tree[0], value = u'give', name = 'lemma')
+    gives = findall_by_attr(tree[0], value = 'give', name = 'lemma')
 
     # For simplicity's sake, only use trees with one give.
     if len(gives) > 1:
       return False
 
     # Search 'pobj' nodes below 'give' node
-    pobjs = findall_by_attr(gives[0], value = u'pobj', name = 'relation', maxlevel = 3)
+    pobjs = findall_by_attr(gives[0], value = 'pobj', name = 'relation', maxlevel = 3)
 
     if len(pobjs) < 1:
       return False
 
     # Finally, check whether the parent of any of the pobj nodes is 'to'.
-    return(any([True if x.parent.lemma == u'to' else False for x in pobjs]))
+    return(any([True if x.parent.lemma == 'to' else False for x in pobjs]))

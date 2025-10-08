@@ -16,17 +16,16 @@ flatten = lambda l: [item for sublist in l for item in sublist]
 # Format a Manatee region as raw concordance line.
 def cow_region_to_conc(region, attrs = True):
   if not attrs:
-    conc = filter(lambda x: x not in ['strc', 'attr', '{}'], region)
+    conc = list(filter(lambda x: x not in ['strc', 'attr', '{}'], region))
     conc = [[words] for segments in conc for words in segments.split()]
   else:
     conc = isplit(region, ['strc', 'attr'])
     conc = [[x.split('\t') for x in subconc] for subconc in conc]
     conc = [flatten(x) for x in conc]
-    conc = filter(lambda x: x not in [['strc'], ['attr']], conc)
-    conc = [filter(None, filter(lambda x: x != '{}', x)) for x in conc]
+    conc = list(filter(lambda x: x not in [['strc'], ['attr']], conc))
+    conc = [list(filter(None, filter(lambda x: x != '{}', x))) for x in conc]
 
-  # Fix UTF-8 mess.
-  conc = [[x.decode('utf-8') for x in xs] for xs in conc]
+  # In Python 3, strings are Unicode by default, no need to decode
   return conc
 
 
