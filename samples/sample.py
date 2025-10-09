@@ -4,7 +4,7 @@ from SeaCOW import Query, ConcordanceWriter, DependencyBuilder
 
 # Create a Query object and set whatever needs to be set.
 q = Query()
-q.corpus          = 'decow16a-nano'         # Lower-case name of the corpus to use.
+q.corpus          = 'decow16b'         # Lower-case name of the corpus to use.
 q.string          = '[word="Gartenzwerg"]'  # A normal CQL string as used in NoSketchEngine.
 q.max_hits        = 10                      # Maximal number of hits to return. Use when testing queries!
 q.attributes      = ['word']                # Attributes (of tokens) to export from corpus.

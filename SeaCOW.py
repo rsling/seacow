@@ -140,7 +140,7 @@ class Query:
 
         # Skip randomly if random subset desired.
         if self.random_subset > 0 and random.random() > self.random_subset:
-          next(results)
+          results.next()
           continue
 
         kwic_beg = results.peek_beg()                                  # Match begin.
@@ -150,7 +150,7 @@ class Query:
 
         # If hit not in desired region, drop.
         if cont_beg_num < 0 or cont_end_num < 0:
-          next(results)
+          results.next()
           continue
 
         cont_beg_pos = h_cont.beg(cont_beg_num)                   # Pos at container begin.
@@ -164,7 +164,7 @@ class Query:
           dd_region = ''.join([region[i].strip().lower() for i in range(0, len(region), 1+len(self.attributes))])
           if dd_region in self.bloom:
             dup_no += 1
-            next(results)
+            results.next()
             continue
           else:
             self.bloom.add(dd_region)
@@ -174,7 +174,7 @@ class Query:
           self.processor.process(self, region, refs, kwic_beg - cont_beg_pos, kwic_end - kwic_beg)
 
         # Advance stream/loop.
-        next(results)
+        results.next()
         counter = counter + 1
 
       # After loop but inside "if not Nonprocessor", set hit count.

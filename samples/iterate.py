@@ -7,7 +7,7 @@ from iterated import IterativelyFiltredDependencyBuilder
 
 # Create a Query object and set whatever needs to be set.
 q = Query()
-q.corpus          = 'encow16a-nano'
+q.corpus          = 'encow16a'
 q.string          = '[word="give" & tag="VB[ZPD]"]'
 q.max_hits        = 100
 q.attributes      = ['word', 'depind', 'dephd', 'deprel', 'tag', 'lemma']

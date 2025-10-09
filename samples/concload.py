@@ -5,7 +5,7 @@ import json # Just for pretty-printing.
 
 # See sample.py for annotations of these attributes.
 q = Query()
-q.corpus          = 'decow16a-nano'
+q.corpus          = 'decow16b'
 q.string          = '[word="Gartenzwerg"]'
 q.max_hits        = 10
 q.attributes      = ['word', 'tag']
