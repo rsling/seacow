@@ -2,7 +2,19 @@
 
 ![Sample dependency graph image](https://raw.githubusercontent.com/rsling/seacow/master/samples/sample.png)
 
-## Note: Because of the additional processing of query results in SeaCOW, it is significantly slower that NoSketchEngine or corpquery. This cannot be avoided unless you drop the extra processing, which is the whole point of having SeaCOW in the first place. Please do not file bug reports or complaints about the speed penalty involved in using SeaCOW. It is designed primarily for running unattended queries on a server with built-in processing, filtering, etc. If you are a Python wizard, you are invited to help us make the additional processing more efficient, of course.
+## Using COW on webcorpora.org or our internal RStudio servers
+
+In RStudio Server TERMINAL (not Console), do this:
+
+```
+cd ~
+echo 'export CORPUS_REGISTRY=/var/cow/manatee/registry' >> ~/.bashrc
+source ~/.bashrc
+git clone https://github.com/rsling/seacow.git SeaCOW
+cd SeaCOW/samples
+mkdir output
+python3 sample.py
+```
 
 ## Features
 
@@ -11,6 +23,8 @@
 - It does not create huge memory structures but processes concordances on the fly.
 - If you want custom processing, create an implementation of the Processor class.
 - Included are two processors: ConcordanceWriter and   DependencyBuilder.
+
+Note: Because of the additional processing of query results in SeaCOW, it can be significantly slower that NoSketchEngine or corpquery, depending on the Processor class you use or write. This cannot be avoided unless you drop the extra processing, which is the whole point of having SeaCOW in the first place. Please do not file bug reports or complaints about the speed penalty involved in using SeaCOW. It is designed primarily for running unattended queries on a server with built-in processing, filtering, etc. If you are a Python wizard, you are invited to help us make the additional processing more efficient, of course.
 
 ## Installation
 
